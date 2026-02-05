@@ -1,0 +1,16 @@
+# Rust build output
+/target/
+
+# Cargo lock 
+Cargo.lock
+
+# Backup / temp files
+*.rs.bk
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
