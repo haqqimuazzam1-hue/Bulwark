@@ -5,7 +5,6 @@ use bulwark::security::inspector::BasicInspector;
 use bulwark::Decision;
 use bulwark::security::inspector_header_size::HeaderSizeInspector;
 use bulwark::security::inspector_method::MethodInspector;
-use bulwark::request::context::Method;
 use bulwark::security::inspector_user_agent::UserAgentInspector;
 
 fn main() {
