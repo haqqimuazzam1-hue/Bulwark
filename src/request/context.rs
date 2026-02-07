@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::str::FromStr;
 
 /// Represents a normalized HTTP request inside Bulwark.
 ///
@@ -42,21 +43,12 @@ impl RequestContext {
     }
 
     /// Insert a header (key will be lowercased).
-    pub fn insert_header(
-        &mut self,
-        key: impl Into<String>,
-        value: impl Into<String>,
-    ) {
-        self.headers
-            .insert(key.into().to_lowercase(), value.into());
+    pub fn insert_header(&mut self, key: impl Into<String>, value: impl Into<String>) {
+        self.headers.insert(key.into().to_lowercase(), value.into());
     }
 
     /// Insert a query parameter.
-    pub fn insert_query(
-        &mut self,
-        key: impl Into<String>,
-        value: impl Into<String>,
-    ) {
+    pub fn insert_query(&mut self, key: impl Into<String>, value: impl Into<String>) {
         self.query.insert(key.into(), value.into());
     }
 
@@ -93,18 +85,19 @@ pub enum Method {
     OPTIONS,
 }
 
-impl Method {
-    /// Convert from &str safely.
-    pub fn from_str(value: &str) -> Option<Self> {
+impl FromStr for Method {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "GET" => Some(Method::GET),
-            "POST" => Some(Method::POST),
-            "PUT" => Some(Method::PUT),
-            "DELETE" => Some(Method::DELETE),
-            "PATCH" => Some(Method::PATCH),
-            "HEAD" => Some(Method::HEAD),
-            "OPTIONS" => Some(Method::OPTIONS),
-            _ => None,
+            "GET" => Ok(Method::GET),
+            "POST" => Ok(Method::POST),
+            "PUT" => Ok(Method::PUT),
+            "DELETE" => Ok(Method::DELETE),
+            "PATCH" => Ok(Method::PATCH),
+            "HEAD" => Ok(Method::HEAD),
+            "OPTIONS" => Ok(Method::OPTIONS),
+            _ => Err(()),
         }
     }
 }

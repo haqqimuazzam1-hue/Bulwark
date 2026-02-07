@@ -24,9 +24,7 @@ impl Server {
 
             // Secara desain seharusnya tidak terjadi,
             // tapi WAJIB ditangani agar match exhaustif
-            Ok(Decision::Block) => {
-                Err(BulwarkError::blocked("request blocked by decision"))
-            }
+            Ok(Decision::Block) => Err(BulwarkError::blocked("request blocked by decision")),
 
             Err(BulwarkError::Blocked { .. }) => {
                 Err(BulwarkError::blocked("request blocked by bulwark"))

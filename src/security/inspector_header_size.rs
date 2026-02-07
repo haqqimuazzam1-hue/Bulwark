@@ -1,6 +1,6 @@
 use crate::request::context::RequestContext;
-use crate::security::inspector::{Inspector, InspectorFinding};
 use crate::security::decision::FindingSeverity;
+use crate::security::inspector::{Inspector, InspectorFinding};
 use crate::BulwarkError;
 
 /// InspectorHeaderSize
@@ -27,18 +27,12 @@ impl InspectorHeaderSize {
 
     /// Hitung total ukuran header (nama + nilai)
     fn calculate_total_size(ctx: &RequestContext) -> usize {
-        ctx.headers
-            .iter()
-            .map(|(k, v)| k.len() + v.len())
-            .sum()
+        ctx.headers.iter().map(|(k, v)| k.len() + v.len()).sum()
     }
 }
 
 impl Inspector for InspectorHeaderSize {
-    fn inspect(
-        &self,
-        ctx: &RequestContext,
-    ) -> Result<Option<InspectorFinding>, BulwarkError> {
+    fn inspect(&self, ctx: &RequestContext) -> Result<Option<InspectorFinding>, BulwarkError> {
         let total_size = Self::calculate_total_size(ctx);
 
         // HARD LIMIT → High severity (Block)

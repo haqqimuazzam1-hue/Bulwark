@@ -1,5 +1,5 @@
-use crate::request::context::RequestContext;
 use super::decision::FindingSeverity;
+use crate::request::context::RequestContext;
 
 /// InspectorFinding
 ///

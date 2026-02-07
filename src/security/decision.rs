@@ -1,7 +1,7 @@
-use crate::request::context::RequestContext;
-use crate::logging::simple::SimpleLogger;
-use crate::{BulwarkError, BulwarkResult, Decision};
 use super::inspector::{Inspector, InspectorFinding};
+use crate::logging::simple::SimpleLogger;
+use crate::request::context::RequestContext;
+use crate::{BulwarkError, BulwarkResult, Decision};
 
 /// DecisionEngine
 ///
@@ -60,9 +60,9 @@ impl DecisionEngine {
 
         // 4. Kembalikan keputusan
         match decision {
-            Decision::Block => {
-                Err(BulwarkError::blocked("request blocked by security decision"))
-            }
+            Decision::Block => Err(BulwarkError::blocked(
+                "request blocked by security decision",
+            )),
             _ => Ok(decision),
         }
     }
@@ -80,6 +80,12 @@ impl DecisionEngine {
         }
 
         decision
+    }
+}
+
+impl Default for DecisionEngine {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

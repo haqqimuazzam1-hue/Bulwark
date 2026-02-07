@@ -1,6 +1,6 @@
 use crate::request::context::RequestContext;
-use crate::security::inspector::{Inspector, InspectorFinding};
 use crate::security::decision::FindingSeverity;
+use crate::security::inspector::{Inspector, InspectorFinding};
 use crate::BulwarkError;
 
 /// InspectorUserAgent
@@ -28,10 +28,7 @@ impl InspectorUserAgent {
 }
 
 impl Inspector for InspectorUserAgent {
-    fn inspect(
-        &self,
-        ctx: &RequestContext,
-    ) -> Result<Option<InspectorFinding>, BulwarkError> {
+    fn inspect(&self, ctx: &RequestContext) -> Result<Option<InspectorFinding>, BulwarkError> {
         let ua = match ctx.headers.get("user-agent") {
             Some(v) => v,
             None => {

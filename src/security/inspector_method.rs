@@ -1,6 +1,6 @@
-use crate::request::context::{RequestContext, Method};
-use crate::security::inspector::{Inspector, InspectorFinding};
+use crate::request::context::{Method, RequestContext};
 use crate::security::decision::FindingSeverity;
+use crate::security::inspector::{Inspector, InspectorFinding};
 use crate::BulwarkError;
 
 pub struct InspectorMethod {
@@ -14,10 +14,7 @@ impl InspectorMethod {
 }
 
 impl Inspector for InspectorMethod {
-    fn inspect(
-        &self,
-        ctx: &RequestContext,
-    ) -> Result<Option<InspectorFinding>, BulwarkError> {
+    fn inspect(&self, ctx: &RequestContext) -> Result<Option<InspectorFinding>, BulwarkError> {
         if !self.allowed_methods.contains(&ctx.method) {
             return Ok(Some(InspectorFinding::new(
                 "inspector_method",
