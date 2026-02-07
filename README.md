@@ -1,5 +1,5 @@
 ![Rust](https://img.shields.io/badge/language-Rust-orange)
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![Version](https://img.shields.io/badge/version-v0.2.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## BULWARK
