@@ -2,7 +2,7 @@
 ![Version](https://img.shields.io/badge/version-v0.2.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-🛡️ Bulwark
+## 🛡️ Bulwark
 
 A lightweight, extensible security middleware for Rust APIs.
 
