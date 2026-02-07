@@ -4,7 +4,7 @@ The format is based on Keep a Changelog,
 and this project follows Semantic Versioning.
 
 [0.2.0] – Decision Engine & Inspector Refactor
-Release date: 8 February 2026
+Release date: 7 February 2026
 
 ✨ Added
 • Centralized Decision Engine (Allow / Log / Block)
