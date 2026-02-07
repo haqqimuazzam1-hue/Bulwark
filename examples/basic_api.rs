@@ -1,21 +1,13 @@
-use bulwark::request::context::{
-    Method,
-    RequestContext,
-};
+use bulwark::request::context::{Method, RequestContext};
 
 fn main() {
     // Simulasi request masuk
-    let ctx = RequestContext::new(
-        Method::POST,
-        "/login",
-    );
+    let ctx = RequestContext::new(Method::POST, "/login");
 
     log_request(&ctx);
 
     if is_login(&ctx) {
-        println!("→ Route: LOGIN");
-    } else {
-        println!("→ Route: UNKNOWN");
+        println!("Login request detected");
     }
 }
 
