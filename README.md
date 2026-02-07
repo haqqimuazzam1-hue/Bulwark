@@ -8,6 +8,8 @@ Bulwark fokus pada security decision pipeline, bukan web framework. Ia bisa dipa
 • request inspection layer
 • fondasi middleware (Axum / Actix / custom server)
 
+_________________________________________
+
 ## FITUR UTAMA (v0.2)
 
 • Request Normalization
@@ -43,6 +45,8 @@ mengikuti hasil final (Allow / Log / Block)
 • hasil predictable
 • cocok untuk resource terbatas
 
+_________________________________________
+
 ## Arsitektur:
 Request
   ↓
@@ -59,19 +63,25 @@ Logging
   ↓
 Allow / Log / Block
 
+_________________________________________
+
 ## Struktur Project:
 src/
-├── request/          # Request context & normalization
-├── security/         # Inspector & decision engine
-├── logging/          # Logging system
-├── server/           # Request executor
-├── lib.rs            # Public API
-└── examples/         # Contoh penggunaan
+request/          # Request context & normalization
+security/         # Inspector & decision engine
+logging/          # Logging system
+server/           # Request executor
+lib.rs            # Public API
+examples/         # Contoh penggunaan
+
+_________________________________________
 
 ## Cara Menginstal:
 1. git clone https://github.com/haqqimuazzam1-hue/Bulwark.git
 2. cd Bulwark
 3. cargo build
+
+_________________________________________
 
 Roadmap:
 v0.2.0 (current)
