@@ -16,7 +16,7 @@ Bulwark helps you inspect, validate, and make decisions about incoming requests 
 
 ---
 
-✨ Features
+✨ Features 
 
 🔍 Request inspection via pluggable inspectors
 
