@@ -85,10 +85,11 @@ Bulwark/
 _________________________________________
 
 ## Cara Menginstal:
+```teks
 1. git clone https://github.com/haqqimuazzam1-hue/Bulwark.git
 2. cd Bulwark
 3. cargo build
-
+```
 _________________________________________
 
 Roadmap:
