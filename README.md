@@ -1,4 +1,4 @@
-BULWARK
+## BULWARK
 
 Bulwark adalah framework security core berbasis Rust yang dirancang untuk membantu security developer membangun lapis pertahanan (WAF / security gateway) yang ringan, modular, dan deterministic.
 
@@ -8,7 +8,7 @@ Bulwark fokus pada security decision pipeline, bukan web framework. Ia bisa dipa
 • request inspection layer
 • fondasi middleware (Axum / Actix / custom server)
 
-FITUR UTAMA (v0.2)
+## FITUR UTAMA (v0.2)
 
 • Request Normalization
 Mencegah Bypass dengan normalisasi
@@ -43,7 +43,7 @@ mengikuti hasil final (Allow / Log / Block)
 • hasil predictable
 • cocok untuk resource terbatas
 
-Arsitektur:
+## Arsitektur:
 Request
   ↓
 Normalize
@@ -59,7 +59,7 @@ Logging
   ↓
 Allow / Log / Block
 
-Struktur Project:
+## Struktur Project:
 src/
 ├── request/          # Request context & normalization
 ├── security/         # Inspector & decision engine
@@ -68,31 +68,10 @@ src/
 ├── lib.rs            # Public API
 └── examples/         # Contoh penggunaan
 
-Contoh Penggunaan:
-use bulwark::request::context::RequestContext;
-use bulwark::security::decision::DecisionEngine;
-use bulwark::security::inspector_method::InspectorMethod;
-use bulwark::security::inspector_header_size::InspectorHeaderSize;
-use bulwark::security::inspector_user_agent::InspectorUserAgent;
-use bulwark::Decision;
-
-let mut ctx = RequestContext::new("POST", "/login");
-ctx.insert_header("User-Agent", "curl/8.0");
-
-let mut engine = DecisionEngine::new();
-
-engine.add(InspectorMethod::new(vec!["GET", "POST"]));
-engine.add(InspectorHeaderSize::new(64, 256));
-engine.add(InspectorUserAgent::new(
-    64,
-    vec!["sqlmap", "nmap", "nikto"],
-));
-
-match engine.decide(&ctx) {
-    Ok(Decision::Allow) => println!("ALLOW"),
-    Ok(Decision::Log) => println!("LOG"),
-    Err(_) => println!("BLOCK"),
-}
+## Cara Menginstal:
+1. git clone https://github.com/haqqimuazzam1-hue/Bulwark.git
+2. cd Bulwark
+3. cargo build
 
 Roadmap:
 v0.2.0 (current)
