@@ -1,4 +1,4 @@
-Contributing to Bulwark
+## Contributing to Bulwark
 
 First of all, thank you for taking the time to contribute! 🛡️✨
 
@@ -61,18 +61,18 @@ Cargo
 
 
 Clone the Repository
-
+```bash
 git clone https://github.com/haqqimuazzam1-hue/Bulwark.git
 cd Bulwark
-
+```
 Run Checks
 
 Before submitting a PR, please make sure these pass:
-
+```Rust
 cargo fmt
 cargo clippy
 cargo test
-
+```
 PRs that fail these checks may be asked to update before review.
 
 
@@ -141,4 +141,9 @@ Ask in a discussion
 Or start with a draft PR
 
 
-We’re happy to help and
+We’re happy to help and guide new contributors.
+
+
+---
+
+Thanks for helping make Bulwark better! 🛡️
