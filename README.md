@@ -1,3 +1,7 @@
+![Rust](https://img.shields.io/badge/language-Rust-orange)
+![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 ## BULWARK
 
 Bulwark adalah framework security core berbasis Rust yang dirancang untuk membantu security developer membangun lapis pertahanan (WAF / security gateway) yang ringan, modular, dan deterministic.
@@ -84,8 +88,8 @@ Bulwark/
 ```
 _________________________________________
 
-## Cara Menginstal:
-```teks
+## Installation:
+```bash
 1. git clone https://github.com/haqqimuazzam1-hue/Bulwark.git
 2. cd Bulwark
 3. cargo build
