@@ -48,6 +48,7 @@ mengikuti hasil final (Allow / Log / Block)
 _________________________________________
 
 ## Arsitektur:
+```teks
 Request
   ↓
 Normalize
@@ -62,10 +63,11 @@ Decision Engine
 Logging
   ↓
 Allow / Log / Block
-
+```
 _________________________________________
 
-## Struktur Project:
+## Project Structure
+```text
 Bulwark/
 ├── src/
 │   ├── server/          # Core server logic
@@ -79,7 +81,7 @@ Bulwark/
 ├── Cargo.lock           # Dependency lockfile
 ├── README.md            # Project documentation
 └── CHANGELOG.md         # Release notes
-
+```
 _________________________________________
 
 ## Cara Menginstal:
