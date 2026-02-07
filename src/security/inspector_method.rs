@@ -1,31 +1,31 @@
 use crate::request::context::{RequestContext, Method};
-use crate::{Decision, BulwarkError, BulwarkResult};
-use super::inspector::Inspector;
+use crate::security::inspector::{Inspector, InspectorFinding};
+use crate::security::decision::FindingSeverity;
+use crate::BulwarkError;
 
-/// Inspector untuk membatasi HTTP method yang diizinkan.
-///
-/// Contoh:
-/// - hanya izinkan GET & POST
-/// - block PUT / DELETE / TRACE / dll
-pub struct MethodInspector {
-    allowed: Vec<Method>,
+pub struct InspectorMethod {
+    allowed_methods: Vec<Method>,
 }
 
-impl MethodInspector {
-    /// Buat MethodInspector dengan daftar method yang diizinkan.
-    pub fn new(allowed: Vec<Method>) -> Self {
-        Self { allowed }
+impl InspectorMethod {
+    pub fn new(allowed_methods: Vec<Method>) -> Self {
+        Self { allowed_methods }
     }
 }
 
-impl Inspector for MethodInspector {
-    fn inspect(&self, ctx: &RequestContext) -> BulwarkResult<Decision> {
-        if self.allowed.contains(&ctx.method) {
-            Ok(Decision::Allow)
-        } else {
-            Err(BulwarkError::blocked(
-                "http method not allowed",
-            ))
+impl Inspector for InspectorMethod {
+    fn inspect(
+        &self,
+        ctx: &RequestContext,
+    ) -> Result<Option<InspectorFinding>, BulwarkError> {
+        if !self.allowed_methods.contains(&ctx.method) {
+            return Ok(Some(InspectorFinding::new(
+                "inspector_method",
+                FindingSeverity::High,
+                format!("method {:?} is not allowed", ctx.method),
+            )));
         }
+
+        Ok(None)
     }
 }

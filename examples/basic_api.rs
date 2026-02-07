@@ -1,18 +1,18 @@
-use bulwark::request::context::{Method, RequestContext};
+use bulwark::request::context::Methode;
 use bulwark::request::normalize::Normalizer;
 use bulwark::security::decision::DecisionEngine;
-use bulwark::security::inspector::BasicInspector;
+use bulwark::security::inspector_method::InspectorMethod;
+use bulwark::security::inspector_header_size::InspectorHeaderSize;
+use bulwark::security::inspector_user_agent::InspectorUserAgent;
 use bulwark::Decision;
-use bulwark::security::inspector_header_size::HeaderSizeInspector;
-use bulwark::security::inspector_method::MethodInspector;
-use bulwark::security::inspector_user_agent::UserAgentInspector;
 
 fn main() {
-    // 1️⃣ Buat request mentah (simulasi request masuk)
-    let mut ctx = RequestContext::new(Method::POST, "///login//");
+    // 1️⃣ Simulasi request masuk
+    let mut ctx = RequestContext::new("POST", "///login//");
 
-    ctx.insert_header(" User-Agent ", " curl/8.0 ");
-    ctx.insert_query(" user ", " admin ");
+    ctx.insert_header("User-Agent", "curl/8.0");
+    ctx.insert_header("X-Test", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    ctx.insert_query("user", "admin");
     ctx.set_body(b"username=admin&password=123".to_vec());
     ctx.set_client_ip("127.0.0.1");
 
@@ -27,24 +27,30 @@ fn main() {
 
     // 3️⃣ Setup decision engine
     let mut engine = DecisionEngine::new();
-    engine.add(BasicInspector);
-    engine.add(HeaderSizeInspector::new(1024));
-    engine.add(MethodInspector::new(vec![
+
+    engine.add(InspectorMethod::new(vec![
     Method::GET,
     Method::POST,
 ]));
-    engine.add(UserAgentInspector::new(vec![
-    "sqlmap",
-    "nmap",
-    "nikto",
-    "masscan",
-    "curl",
-    "python-request",
-    "go-http-client",
-]));
 
+    engine.add(InspectorHeaderSize::new(
+        64,    // soft limit (log)
+        256,   // hard limit (block)
+    ));
 
-    // 4️⃣ Run security decision
+    engine.add(InspectorUserAgent::new(
+        64, // max UA length
+        vec![
+            "sqlmap",
+            "nmap",
+            "nikto",
+            "masscan",
+            "python",
+            "curl",
+        ],
+    ));
+
+    // 4️⃣ Jalankan decision
     println!("\n== SECURITY DECISION ==");
 
     match engine.decide(&ctx) {
@@ -56,7 +62,7 @@ fn main() {
                 println!("⚠️ LOG: request allowed but logged");
             }
             Decision::Block => {
-                // Sebenarnya tidak akan ke sini
+                // Secara desain, Block biasanya lewat Err
                 println!("❌ BLOCK");
             }
         },

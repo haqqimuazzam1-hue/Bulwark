@@ -1,40 +1,75 @@
 use crate::request::context::RequestContext;
-use crate::{Decision, BulwarkError, BulwarkResult};
-use super::inspector::Inspector;
+use crate::security::inspector::{Inspector, InspectorFinding};
+use crate::security::decision::FindingSeverity;
+use crate::BulwarkError;
 
-/// Inspector untuk mendeteksi User-Agent berbahaya.
+/// InspectorUserAgent
 ///
-/// Contoh yang sering dipakai attacker:
-/// - sqlmap
-/// - nmap
-/// - nikto
-/// - curl (opsional)
-pub struct UserAgentInspector {
-    blocked_agents: Vec<&'static str>,
+/// Mengecek User-Agent yang mencurigakan.
+/// Heuristic sederhana:
+/// - Kosong / tidak ada -> Medium
+/// - Mengandung keyword berisiko -> Medium
+/// - Terlalu panjang -> High
+pub struct InspectorUserAgent {
+    /// Panjang maksimum UA yang masih dianggap wajar
+    max_length: usize,
+
+    /// Daftar keyword mencurigakan (lowercase)
+    suspicious_keywords: Vec<&'static str>,
 }
 
-impl UserAgentInspector {
-    /// Buat UserAgentInspector dengan daftar substring UA yang diblokir
-    pub fn new(blocked_agents: Vec<&'static str>) -> Self {
-        Self { blocked_agents }
+impl InspectorUserAgent {
+    pub fn new(max_length: usize, suspicious_keywords: Vec<&'static str>) -> Self {
+        Self {
+            max_length,
+            suspicious_keywords,
+        }
     }
 }
 
-impl Inspector for UserAgentInspector {
-    fn inspect(&self, ctx: &RequestContext) -> BulwarkResult<Decision> {
+impl Inspector for InspectorUserAgent {
+    fn inspect(
+        &self,
+        ctx: &RequestContext,
+    ) -> Result<Option<InspectorFinding>, BulwarkError> {
         let ua = match ctx.headers.get("user-agent") {
-            Some(v) => v.to_lowercase(),
-            None => return Ok(Decision::Allow), // tidak ada UA → tidak langsung block
+            Some(v) => v,
+            None => {
+                return Ok(Some(InspectorFinding::new(
+                    "inspector_user_agent",
+                    FindingSeverity::Medium,
+                    "missing user-agent header",
+                )));
+            }
         };
 
-        for bad in &self.blocked_agents {
-            if ua.contains(bad) {
-                return Err(BulwarkError::blocked(
-                    "blocked by user-agent inspector",
-                ));
+        // Terlalu panjang -> High
+        if ua.len() > self.max_length {
+            return Ok(Some(InspectorFinding::new(
+                "inspector_user_agent",
+                FindingSeverity::High,
+                format!(
+                    "user-agent length {} exceeds max {}",
+                    ua.len(),
+                    self.max_length
+                ),
+            )));
+        }
+
+        let ua_lower = ua.to_lowercase();
+
+        // Mengandung keyword mencurigakan -> Medium
+        for keyword in &self.suspicious_keywords {
+            if ua_lower.contains(keyword) {
+                return Ok(Some(InspectorFinding::new(
+                    "inspector_user_agent",
+                    FindingSeverity::Medium,
+                    format!("user-agent contains suspicious keyword `{}`", keyword),
+                )));
             }
         }
 
-        Ok(Decision::Allow)
+        // Aman
+        Ok(None)
     }
 }

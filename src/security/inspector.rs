@@ -1,47 +1,48 @@
 use crate::request::context::RequestContext;
-use crate::{Decision, BulwarkError, BulwarkResult};
+use super::decision::FindingSeverity;
 
-/// Inspector trait.
+/// InspectorFinding
 ///
-/// Inspector bertugas:
-/// - menganalisis request
-/// - mengembalikan Decision
-///
-/// Inspector TIDAK:
-/// - kirim response
-/// - terminate server
-pub trait Inspector {
-    fn inspect(&self, ctx: &RequestContext) -> BulwarkResult<Decision>;
+/// Hasil temuan dari sebuah inspector.
+/// Inspector TIDAK BOLEH mengambil keputusan,
+/// hanya melaporkan apa yang dia temukan.
+#[derive(Debug, Clone)]
+pub struct InspectorFinding {
+    /// Nama inspector (untuk logging & debugging)
+    pub inspector: &'static str,
+
+    /// Tingkat keparahan temuan
+    pub severity: FindingSeverity,
+
+    /// Alasan / penjelasan singkat
+    pub reason: String,
 }
 
-/// Built-in inspector: basic sanity checks.
-///
-/// Ini inspector pertama Bulwark.
-/// Kecil, jelas, dan realistis.
-pub struct BasicInspector;
-
-impl Inspector for BasicInspector {
-    fn inspect(&self, ctx: &RequestContext) -> BulwarkResult<Decision> {
-        // 1. Block empty path
-        if ctx.path.trim().is_empty() {
-            return Err(BulwarkError::blocked("empty request path"));
+impl InspectorFinding {
+    pub fn new(
+        inspector: &'static str,
+        severity: FindingSeverity,
+        reason: impl Into<String>,
+    ) -> Self {
+        Self {
+            inspector,
+            severity,
+            reason: reason.into(),
         }
-
-        // 2. Block missing User-Agent
-        if ctx.header("user-agent").is_none() {
-            return Err(BulwarkError::blocked("missing user-agent header"));
-        }
-
-        // 3. Block suspicious path traversal
-        if ctx.path.contains("..") {
-            return Err(BulwarkError::blocked("path traversal detected"));
-        }
-
-        // 4. Log requests with empty body on POST
-        if ctx.method == crate::request::context::Method::POST && !ctx.has_body() {
-            return Ok(Decision::Log);
-        }
-
-        Ok(Decision::Allow)
     }
+}
+
+/// Inspector trait
+///
+/// Semua inspector HARUS mengimplementasikan trait ini.
+///
+/// Kontrak penting:
+/// - Ok(None)        → tidak ada masalah
+/// - Ok(Some(finding)) → ada temuan
+/// - Err(...)        → error fatal (pipeline berhenti)
+pub trait Inspector: Send + Sync {
+    fn inspect(
+        &self,
+        ctx: &RequestContext,
+    ) -> Result<Option<InspectorFinding>, crate::BulwarkError>;
 }

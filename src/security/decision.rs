@@ -1,28 +1,28 @@
 use crate::request::context::RequestContext;
-use crate::{Decision, BulwarkError, BulwarkResult};
 use crate::logging::simple::SimpleLogger;
-use super::inspector::Inspector;
+use crate::{BulwarkError, BulwarkResult, Decision};
+use super::inspector::{Inspector, InspectorFinding};
 
 /// DecisionEngine
 ///
-/// Menjalankan semua inspector secara berurutan
-/// dan menghasilkan satu keputusan final.
+/// Satu-satunya komponen yang BERHAK
+/// menentukan keputusan security.
 ///
-/// Prioritas:
-/// BLOCK > LOG > ALLOW
+/// Alur:
+/// Request -> Inspectors -> Decision -> Logging -> Server
 pub struct DecisionEngine {
     inspectors: Vec<Box<dyn Inspector>>,
 }
 
 impl DecisionEngine {
-    /// Membuat decision engine kosong.
+    /// Membuat decision engine kosong
     pub fn new() -> Self {
         Self {
             inspectors: Vec::new(),
         }
     }
 
-    /// Menambahkan inspector ke pipeline.
+    /// Menambahkan inspector ke pipeline
     pub fn add<I>(&mut self, inspector: I)
     where
         I: Inspector + 'static,
@@ -30,30 +30,63 @@ impl DecisionEngine {
         self.inspectors.push(Box::new(inspector));
     }
 
-    /// Menjalankan semua inspector dan menentukan keputusan akhir.
+    /// Menjalankan seluruh inspector dan menghasilkan keputusan final
+    ///
+    /// Prioritas:
+    /// BLOCK > LOG > ALLOW
     pub fn decide(&self, ctx: &RequestContext) -> BulwarkResult<Decision> {
-        let mut final_decision = Decision::Allow;
+        let mut findings: Vec<InspectorFinding> = Vec::new();
 
+        // 1. Jalankan semua inspector
         for inspector in &self.inspectors {
             match inspector.inspect(ctx) {
-                Ok(decision) => match decision {
-                    Decision::Allow => {}
-                    Decision::Log => {
-                        final_decision = Decision::Log;
-                        SimpleLogger::log(ctx, &Decision::Log, "flagged by inspector");
-                    }
-                    Decision::Block => {
-                        SimpleLogger::log(ctx, &Decision::Block, "blocked by inspector");
-                        return Err(BulwarkError::blocked("blocked by security rule"));
-                    }
-                },
+                Ok(Some(finding)) => findings.push(finding),
+                Ok(None) => {}
                 Err(err) => {
-                    SimpleLogger::log(ctx, &Decision::Block, "blocked by inspector error");
+                    // Inspector error = hard fail
+                    SimpleLogger::log(ctx, &Decision::Block, "inspector error");
                     return Err(err);
                 }
             }
         }
 
-        Ok(final_decision)
+        // 2. Tentukan keputusan berdasarkan findings
+        let decision = Self::evaluate_findings(&findings);
+
+        // 3. Logging terpusat
+        for finding in &findings {
+            SimpleLogger::log(ctx, &decision, &finding.reason);
+        }
+
+        // 4. Kembalikan keputusan
+        match decision {
+            Decision::Block => {
+                Err(BulwarkError::blocked("request blocked by security decision"))
+            }
+            _ => Ok(decision),
+        }
     }
+
+    /// Mengevaluasi semua temuan inspector
+    fn evaluate_findings(findings: &[InspectorFinding]) -> Decision {
+        let mut decision = Decision::Allow;
+
+        for finding in findings {
+            match finding.severity {
+                FindingSeverity::High => return Decision::Block,
+                FindingSeverity::Medium => decision = Decision::Log,
+                FindingSeverity::Low => {}
+            }
+        }
+
+        decision
+    }
+}
+
+/// Tingkat keparahan temuan inspector
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FindingSeverity {
+    Low,
+    Medium,
+    High,
 }

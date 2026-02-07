@@ -1,10 +1,16 @@
 [package]
 name = "bulwark"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+
 authors = ["Bulwark Contributors"]
-description = "Security-first backend framework for Rust"
+description = "A security-first decision engine framework for inspecting and controlling requests"
 license = "MIT"
-repository = "https://github.com/yourname/bulwark"
+
+repository = "https://github.com/haqqimuazzam1-hue/Bulwark.git"
+readme = "README.md"
+
+keywords = ["security", "waf", "middleware", "rust", "framework"]
+categories = ["web-programming", "network-programming"]
 
 [dependencies]

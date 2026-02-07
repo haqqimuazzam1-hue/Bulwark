@@ -6,24 +6,42 @@ Bulwark fokus pada security decision pipeline, bukan web framework. Ia bisa dipa
 • core WAF
 • security engine
 • request inspection layer
-• fondasi middleware Axum / Actix (v0.2)
+• fondasi middleware (Axum / Actix / custom server)
 
-FITUR UTAMA (v0.1)
+FITUR UTAMA (v0.2)
 
 • Request Normalization
-Mencegah bypass dengan path, header, dan query normalization.
+Mencegah Bypass dengan normalisasi
+• path
+• header
+• query
 
 • Inspector-based Architecture
-Setiap rule adalah Inspector terpisah dan modular.
+Setiap rule security adalah Inspector terpisah:
+• modular
+• mudah ditambah
+• mudah diuji
+Inspector tidak mengambil keputusan - hanya mendeteksi.
 
-• Decision Engine
-Menghasilkan keputusan final: Allow, Log, atau Block.
+• Centralized Decision Engine
+Semua hasil Inspector dikumpulkan dan diproses oleh Decision Engine.
+Keputusan Akhir:
+• Allow
+• Log
+• Block
+Decision hanya satu pintu, konsisten dan dapat diaudit.
 
 • Security Logging
-Logging ringan untuk request mencurigakan dan diblokir.
+Logging ringan berbasis decision:
+tidak noisy
+tidak liar
+mengikuti hasil final (Allow / Log / Block)
 
 • Ringan & HP-friendly
-Bisa dikembangkan dan dijalankan di HP (Ram kecil).
+• tanpa magic
+• tanpa async berlebihan
+• hasil predictable
+• cocok untuk resource terbatas
 
 Arsitektur:
 Request
@@ -31,12 +49,13 @@ Request
 Normalize
   ↓
 Inspector Pipeline
-  ├─ BasicInspector
-  ├─ HeaderSizeInspector
-  ├─ MethodInspector
-  ├─ UserAgentInspector
+  ├─ Method Inspector
+  ├─ Header Size Inspector
+  ├─ User-Agent Inspector
   ↓
 Decision Engine
+  ↓
+Logging
   ↓
 Allow / Log / Block
 
@@ -45,15 +64,29 @@ src/
 ├── request/          # Request context & normalization
 ├── security/         # Inspector & decision engine
 ├── logging/          # Logging system
+├── server/           # Request executor
 ├── lib.rs            # Public API
 └── examples/         # Contoh penggunaan
 
 Contoh Penggunaan:
+use bulwark::request::context::RequestContext;
+use bulwark::security::decision::DecisionEngine;
+use bulwark::security::inspector_method::InspectorMethod;
+use bulwark::security::inspector_header_size::InspectorHeaderSize;
+use bulwark::security::inspector_user_agent::InspectorUserAgent;
+use bulwark::Decision;
+
+let mut ctx = RequestContext::new("POST", "/login");
+ctx.insert_header("User-Agent", "curl/8.0");
+
 let mut engine = DecisionEngine::new();
-engine.add(BasicInspector);
-engine.add(HeaderSizeInspector::new(1024));
-engine.add(MethodInspector::new(vec![Method::GET, Method::POST]));
-engine.add(UserAgentInspector::new(vec!["sqlmap", "nmap"]));
+
+engine.add(InspectorMethod::new(vec!["GET", "POST"]));
+engine.add(InspectorHeaderSize::new(64, 256));
+engine.add(InspectorUserAgent::new(
+    64,
+    vec!["sqlmap", "nmap", "nikto"],
+));
 
 match engine.decide(&ctx) {
     Ok(Decision::Allow) => println!("ALLOW"),
@@ -62,21 +95,25 @@ match engine.decide(&ctx) {
 }
 
 Roadmap:
-v0.1 (sekarang)
-• Core security engine
-• Inspector system
-• Logging
+v0.2.0 (current)
+✅ Decision end-to-end
+✅ Inspector refactor (finding-based)
+✅ Centralized logging
+✅ Server executor
+✅ Example end-to-end
 
-v0.2 (planned)
-• Config-based engine
-• Response helper
-• Axum / Actix integration
-• Rate limiting
+v0.3.0 (planned)
+Config-based engine
+Inspector enable / disable
+Axum / Actix integration
+Rate limiting
+Structured logging (JSON)
 
 Filosofi:
-"Security should be boring, predictable, amd hard to bypass."
+"Security should be boring, predictable, and hard to bypass."
 
-Bulwark tidak mengejar magic, tapi kejelasan dan kontrol penuh bagi security developer.
+Bulwark tidak mengejar magic atau AI hype.
+Bulwark mengejar kejelasan, kontrol, dan determinisme.
 
 Status:
 Experimental - API bisa berubah
