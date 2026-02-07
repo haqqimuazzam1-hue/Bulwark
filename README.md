@@ -5,7 +5,7 @@
 
 ## 🛡️ Bulwark
 
-A lightweight, extensible security middleware for Rust APIs.
+A lightweight, extensible security middleware for Rust APIs. 
 
 Bulwark helps you inspect, validate, and make decisions about incoming requests before they reach your application logic. It is designed to be simple, composable, and framework-agnostic.
 
