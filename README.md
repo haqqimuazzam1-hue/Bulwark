@@ -66,13 +66,19 @@ Allow / Log / Block
 _________________________________________
 
 ## Struktur Project:
-src/
-request/          # Request context & normalization
-security/         # Inspector & decision engine
-logging/          # Logging system
-server/           # Request executor
-lib.rs            # Public API
-examples/         # Contoh penggunaan
+Bulwark/
+├── src/
+│   ├── server/          # Core server logic
+│   ├── security/        # Decision engine & inspectors
+│   ├── logging/         # Logging implementations
+│   ├── request/         # Request context & method definitions
+│   └── lib.rs           # Library entry point
+├── examples/
+│   └── basic_api.rs     # Basic usage example
+├── Cargo.toml           # Project configuration
+├── Cargo.lock           # Dependency lockfile
+├── README.md            # Project documentation
+└── CHANGELOG.md         # Release notes
 
 _________________________________________
 
